@@ -11,7 +11,7 @@ def orderList(s):
     return ("".join(elements))
     
 
-df_original = pd.read_json('grades.json')
+df_original = pd.read_json('grades_original.json')
 
 #remove parent courses, only keeps courses with subcourse
 df = df_original[df_original['ordering'] != 'null']
