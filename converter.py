@@ -11,10 +11,10 @@ def orderList(s):
     return ("".join(elements))
     
 
-df_original = pd.read_json('grades_original.json')
+df_original = pd.read_json('grades_neworder.json')
 
 #remove parent courses, only keeps courses with subcourse
-df = df_original[df_original['ordering'] != 'null']
+df = df_original[df_original['parentIdCourse'] != 'null']
 
 #df['idParentCourseConverted'] = [row[row.rindex('-')+1:len(row)-1] if row!='null' else 'null' for row in df['parentIdCourse']] 
 
@@ -51,10 +51,14 @@ for i in range(len(df_unique_ids)):
 
     print("groupby final")
     #this block pivots table by subcourse, mark,...,extra3 and term
-    group_course = pd.pivot_table(filtered_df,index=["idPerson","personName","parentIdCourse","parentCourseName","position"],values=["mark"],columns=["labelGroup","idTerm"],aggfunc="first")
-    group_course = group_course.sort_values(["parentIdCourse", "personName"], ascending = (True, True))
+    group_course = pd.pivot_table(filtered_df,index=["idAcademicYear","idAcademicStage","idAcademicProgram","idAcademicMode","idSchoolYear","idGroup","idFaculty","idAcademy","idDepartment","idCategory","idPerson","personName","parentIdCourse","parentCourseName","position"],values=["mark","absence"],columns=["labelGroup","idTerm"],aggfunc="first")
+    group_course = group_course.sort_values([ "idGroup","parentIdCourse", "personName"], ascending = (True,True, True))
     print(group_course)  
-    
+
+    group_course_copy = group_course[:]
+    group_course_copy.reset_index()
+    group_course_copy.to_csv("submaterias.csv")
+
 
 
 
@@ -63,10 +67,25 @@ for i in range(len(df_unique_ids)):
 
 
 #this block pivots table per mark,absence..., extra3 and term
-tr = pd.pivot_table(df_original,index=["idPerson","personName","idCourse","courseName","position","ordering"],values=["mark","absence","behaviour","note","extra1","extra2","extra3"],columns=["idTerm"],aggfunc="first")
-tr = tr.sort_values(["personName", "position","ordering"], ascending = (True, True,False))
+
+#BOLLETIN
+tr_bulletin = pd.pivot_table(df_original,index=["idAcademicYear","idAcademicStage","idAcademicProgram","idAcademicMode","idSchoolYear","idGroup","idFaculty","idAcademy","idDepartment","idCategory","idPerson","personName","idCourse","courseName","position","ordering"],values=["mark","absence","behaviour","note","extra1","extra2","extra3"],columns=["idTerm"],aggfunc="first")
+tr_bulletin = tr_bulletin.sort_values(["idGroup","personName", "position","ordering"], ascending = (True, True, True,True))
 print("MATERIA GENERAL")
-print(tr)
+print(tr_bulletin)
+tr_bulletin_copy = tr_bulletin[:]
+tr_bulletin_copy.reset_index()
+tr_bulletin_copy.to_csv("general_bolletin.csv")
+
+
+#ACTA GENERAL
+tr_sheet = pd.pivot_table(df_original,index=["idAcademicYear","idAcademicStage","idAcademicProgram","idAcademicMode","idSchoolYear","idGroup","idFaculty","idAcademy","idDepartment","idCategory","idPerson","personName","idCourse","courseName","position","ordering"],values=["mark","absence","behaviour","note","extra1","extra2","extra3"],columns=["idTerm"],aggfunc="first")
+tr_sheet = tr_sheet.sort_values(["idGroup", "position","ordering","personName"], ascending = (True, True, True,True))
+print("MATERIA GENERAL")
+print(tr_sheet)
+tr_sheet_copy = tr_sheet[:]
+tr_sheet_copy.reset_index()
+tr_sheet_copy.to_csv("general_sheet.csv")
 
 
 """
